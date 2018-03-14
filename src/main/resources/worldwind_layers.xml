@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2012 United States Government as represented by the Administrator of the
+  ~ National Aeronautics and Space Administration.
+  ~ All Rights Reserved.
+  -->
+
+<!--$Id$-->
+<!--This document specifies the initial layers to load in World Wind-->
+<!--This list can be overridden by specifying an alternate list in worldwind.xml, or by specifying an-->
+<!--alternate configuration document-->
+<!--See the javadoc for the Configuration class for details-->
+<LayerList>
+
+    <Layer className="gov.nasa.worldwind.layers.Earth.BMNGOneImage">
+        <Property name="MinActiveAltitude" value="3e6"/>
+    </Layer>
+
+    <Layer className="onethreeseven.trajsuite.core.model.OSMMapnikHigherResLayer" actuate="onRequest"/>
+    <Layer className="onethreeseven.trajsuite.core.model.StamenTonerBaseMapLayer" actuate="onLoad"/>
+    <Layer href="config/Earth/BMNGWMSLayer2.xml" actuate="onRequest"/>
+    <Layer href="config/Earth/EarthAtNightLayer.xml" actuate="onRequest"/>
+    <Layer href="config/Earth/USGSTNMTopoLayer.xml" actuate="onRequest"/>
+    <Layer href="config/Earth/USGSTopoLowResLayer.xml" actuate="onRequest"/>
+
+    <Layer className="gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer"/>
+    <Layer className="gov.nasa.worldwind.layers.WorldMapLayer"/>
+    <Layer className="gov.nasa.worldwind.layers.ScalebarLayer"/>
+    <Layer className="gov.nasa.worldwind.layers.CompassLayer"/>
+</LayerList>

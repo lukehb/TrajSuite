@@ -1,0 +1,142 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+    id 'com.zyxist.chainsaw' version '0.1.3'
+    id 'maven'
+    id 'maven-publish'
+    id 'java'
+    id 'idea'
+}
+
+
+group 'onethreeseven'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    maven { url 'https://github.com/lukehb/137-jars/raw/master/repository' } //for jars not on maven central
+    maven{url 'https://dl.bintray.com/lukehb/worldwind-bundled'} //for the modified worldwind core
+    maven{url 'https://dl.bintray.com/lukehb/gdal-fat'} //for gdal fat jar
+    maven{url 'https://dl.bintray.com/lukehb/137-collections'} //some custom collections we use
+    maven{url 'https://dl.bintray.com/lukehb/137-datastructures'} //some datastructures we use
+    maven{url 'https://dl.bintray.com/lukehb/137-common'} //some custom utilities we use
+    //maven{url 'https://dl.bintray.com/lukehb/137-SPM'} //sequential pattern mining
+    maven{url 'https://dl.bintray.com/lukehb/137-stopmove'} //stop-move detection
+    //maven{url 'https://dl.bintray.com/lukehb/137-geo'} //mapping projections mostly
+    maven{url 'https://clojars.org/repo'} //for jogl and gluegen fat jars
+    mavenCentral()
+    mavenLocal()
+}
+
+ext.moduleName = 'onethreeseven.trajsuite.core'
+javaModule.name = moduleName
+
+//patch out split packages here
+
+//xerces is used by osmosis, however, it has a split package with the jdk "org.w3c.dom.html"
+javaModule.patchModules 'xerces:xercesImpl': 'jdk.xml.dom'
+
+//end patching out
+
+dependencies {
+	//test
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    ////////////////////
+    //our own modules
+    ////////////////////
+
+    //common
+    compile (group: 'onethreeseven', name: 'common', version: '0.0.5-SNAPSHOT') {force = true}
+
+    //for our custom plugins system
+    compile (group: 'onethreeseven', name: 'trajsuitePlugin', version: '0.0.1-SNAPSHOT') {force = true}
+
+    //clustering
+    compile (group: 'onethreeseven', name: 'clustering', version: '0.0.1-SNAPSHOT') {force = true}
+
+
+    //rois
+    compile (group: 'onethreeseven', name: 'roi', version: '0.0.1-SNAPSHOT') {force = true}
+
+    //data-structures
+    compile (group: 'onethreeseven', name: 'datastructures', version: '0.0.4-SNAPSHOT') {force = true}
+    //stop-move
+    compile group: 'onethreeseven', name: 'stopmove', version: '0.0.5-SNAPSHOT'
+
+    //spm
+    compile group: 'onethreeseven', name: 'spm', version: '0.0.1-SNAPSHOT'
+
+    //simplification
+    compile group: 'onethreeseven', name: 'simplification', version: '0.0.1-SNAPSHOT'
+    //jcli
+    compile group: 'onethreeseven', name: 'jclimod', version: '0.0.1-SNAPSHOT'
+
+    //various useful 3rd party libs
+    compile group: 'com.beust', name: 'jcommander', version: '1.48'
+    compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
+    compile group: 'gov.nasa', name: 'ww-core', version: '0.0.4'
+
+    //for loading pbf files from OSM
+    compile group: 'org.openstreetmap.osmosis', name: 'osmosis-osm-binary', version: '0.44.1'
+    compile group: 'org.openstreetmap.osmosis', name: 'osmosis-areafilter', version: '0.44.1'
+    compile group: 'org.openstreetmap.osmosis', name: 'osmosis-xml', version: '0.44.1'
+    compile group: 'org.openstreetmap.osmosis', name: 'osmosis-pbf2', version: '0.44.1'
+    compile group: 'org.openstreetmap.osmosis', name: 'osmosis-pbf', version: '0.44.1'
+
+    //for java 9 split-package reasons have to patch out xerces
+    patch group: 'xerces', name: 'xercesImpl', version: '2.9.1'
+
+    //map-matching
+    compile(group: 'com.graphhopper', name: 'graphhopper-map-matching-core', version: '0.9.0') {
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+
+    //for geometry
+    compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
+    //for four-square api
+    compile group: 'me.atlis', name: 'foursquare-api', version: '1.0.6'
+}
+ //String xercesPath = project.configurations.compile.find { it.name.startsWith("xercesImpl") }
+
+
+jar {
+    inputs.property("moduleName", moduleName)
+    manifest {
+        attributes(
+                'Automatic-Module-Name': moduleName,
+                "Implementation-Title": project.name,
+                "Implementation-Version": version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'))
+    }
+}
+
+jar.dependsOn(test)
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc{
+    options.addStringOption('-module-path', classpath.asPath)
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from 'build/docs/javadoc'
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
