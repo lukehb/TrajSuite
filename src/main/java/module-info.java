@@ -2,7 +2,6 @@ import onethreeseven.trajsuite.core.model.TrajsuiteProgramSupplier;
 import onethreeseven.trajsuitePlugin.model.ProgramSupplier;
 
 module onethreeseven.trajsuite.core {
-    requires reflections;
     requires java.logging;
     requires javafx.swing;
     requires javafx.controls;
@@ -17,12 +16,12 @@ module onethreeseven.trajsuite.core {
     requires onethreeseven.roi;
     requires onethreeseven.spm;
     requires onethreeseven.stopmove;
-
     requires onethreeseven.common;
+    requires onethreeseven.simplification;
+
     requires graphhopper.core;
     requires graphhopper.map.matching.core;
     requires graphhopper.reader.osm;
-    requires guava;
     requires jogl.all.fat;
     requires gluegen.rt.fat;
     requires hppc;
@@ -31,15 +30,14 @@ module onethreeseven.trajsuite.core {
     requires osmosis.pbf2;
     requires osmosis.xml;
     requires jcommander;
-    requires foursquare.api;
 
 
     //subject to module upgrade when I get around to it
-    requires simplification;
     requires ww.core;
 
     //for fxml resources
     exports onethreeseven.trajsuite.core.view;
+    opens onethreeseven.trajsuite.core.view;
 
     //exports
     exports onethreeseven.trajsuite.core;

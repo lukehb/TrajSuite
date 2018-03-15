@@ -1,7 +1,6 @@
 package onethreeseven.trajsuite.core.graphics;
 
 
-import com.google.common.util.concurrent.*;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.globes.Earth;
@@ -15,12 +14,13 @@ import onethreeseven.trajsuite.core.util.WWExtrasUtil;
 import onethreeseven.trajsuitePlugin.graphics.GraphicsPayload;
 import onethreeseven.trajsuitePlugin.graphics.PackedVertexData;
 
-import javax.media.opengl.GL;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.nio.DoubleBuffer;
-import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
@@ -34,17 +34,18 @@ public class GLGeoGraph extends GLVboRenderable {
 
 
     private final AtomicReference<PackedVertexData> payload = new AtomicReference<>(null);
-    private final Logger logger = Logger.getLogger(GLGeoGraph.class.getSimpleName());
     private boolean listeningForChanges = false;
     private PropertyChangeListener viewChangeListener = null;
-    private ListeningExecutorService exec = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-            .setNameFormat("GLGeoGraph-%d").build()));
+
+    private final ThreadFactory tf = r -> new Thread(r, "GLGeoGraph");
+    private final ExecutorService exec = Executors.newSingleThreadExecutor(tf);
+
 
     private ObjectProperty<LatLonBounds> viewBounds = new SimpleObjectProperty<>(
             new LatLonBounds(-85, 85, -175, 175));
 
     private boolean firstDraw = true;
-    private ListenableFuture jobStatus = null;
+    private CompletableFuture jobStatus = null;
     private AtomicBoolean isDirty = new AtomicBoolean(true);
     private double movementThreshold = 1000;
 
@@ -97,37 +98,39 @@ public class GLGeoGraph extends GLVboRenderable {
 
     private void updateVertsViaWorker() {
         if (jobStatus == null || jobStatus.isDone() || jobStatus.isCancelled()) {
-            jobStatus = exec.submit(() -> {
+            jobStatus = CompletableFuture.runAsync(()->{
+
+                ////////////////    |
+                //THE WORK          |
+                ///////////////     V
+
                 //Start requesting graph edges
                 payload.set(createVertexDataImpl());
+
+                //now handle success and failure cases below
+
+            }, exec).handle((aVoid, throwable) -> {
+                //success
+                if(throwable == null){
+                    //Finished requesting graph edges
+                    //if view has changed since we were working, update
+                    if (isDirty.get()) {
+                        updateVertsViaWorker();
+                    }
+                }
+                //failure
+                else{
+                    throwable.printStackTrace();
+                }
+                return null;
             });
             isDirty.set(false);
+
         } else {
             //job is still executing
             isDirty.set(true);
         }
 
-        //add a callback to the job
-        Futures.addCallback(jobStatus, new FutureCallback<>() {
-            @Override
-            public void onSuccess(Object result) {
-                //Finished requesting graph edges
-                //if view has changed since we were working, update
-                if (isDirty.get()) {
-                    updateVertsViaWorker();
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                t.printStackTrace();
-                if (t.getCause() instanceof CancellationException) {
-                    logger.severe("Getting graph edges was cancelled by new job.");
-                } else {
-                    logger.severe("Error getting graph edges: " + t.getMessage());
-                }
-            }
-        });
     }
 
     @Override

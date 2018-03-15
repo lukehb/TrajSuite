@@ -1,9 +1,5 @@
 package onethreeseven.trajsuite.core.view;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -20,8 +16,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-
-import java.util.concurrent.Executors;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -63,34 +59,21 @@ public class ProgressDialog {
             progressLabel.setText(String.format(percentageFmt, newValue.doubleValue() * 100));
         }));
 
-        //createAnnotation a separate executor to fromTrajToRoISequence this task
-        ListeningExecutorService exec = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
-        Futures.addCallback(exec.submit(task), new FutureCallback<T>() {
-            @Override
-            public void onSuccess(T result) {
-                try {
-                    //close the dialog ui
-                    ProgressDialog.this.close();
-                    //fire the callback
-                    callback.accept(result);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                } finally {
-                    //shut down the task thread
-                    exec.shutdown();
-                }
-            }
+        CompletableFuture.supplyAsync(task::call).handle((BiFunction<T, Throwable, Void>) (t, throwable) -> {
 
-            @Override
-            public void onFailure(Throwable t) {
-                //describe what happened on the ui
-                task.describe(t.getMessage());
+            //success
+            if(throwable == null){
+                callback.accept(t);
                 //close the dialog ui
-                ProgressDialog.this.close();
-                //shut down the task thread
-                exec.shutdown();
+                Platform.runLater(ProgressDialog.this::close);
             }
+            //failure
+            else{
+                throwable.printStackTrace();
+            }
+            return null;
         });
+
     }
 
     private void close() {

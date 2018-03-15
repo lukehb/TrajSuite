@@ -1,6 +1,5 @@
 package onethreeseven.trajsuite.experiments.Effectiveness;
 
-import algorithm.*;
 import onethreeseven.common.util.FileUtil;
 import onethreeseven.datastructures.data.STTrajectoryParser;
 import onethreeseven.datastructures.data.resolver.*;
@@ -9,6 +8,7 @@ import onethreeseven.datastructures.model.STTrajectory;
 import onethreeseven.datastructures.model.SpatioCompositeTrajectory;
 import onethreeseven.geo.projection.AbstractGeographicProjection;
 import onethreeseven.geo.projection.ProjectionEquirectangular;
+import onethreeseven.simplification.algorithm.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,8 +37,8 @@ public class SimplificationSemanticAccuracy {
     private final static AbstractTrajectorySimplifier[] algos = new AbstractTrajectorySimplifier[]{
             new DRTA(),
             new STDRSED(),
-            new DRDP(),
-            new SPLDP(),
+            new DRPD(),
+            new SPLPD(),
             new STSPLSED()
     };
 

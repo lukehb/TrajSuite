@@ -1,14 +1,12 @@
 package onethreeseven.trajsuite.experiments.Mining;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+
 import onethreeseven.spm.data.SPMFItemsetWriter;
 import onethreeseven.spm.data.SPMFWriter;
 import onethreeseven.trajsuite.osm.model.SemanticPlace;
 import onethreeseven.trajsuite.osm.model.SemanticPt;
 import onethreeseven.trajsuite.osm.model.SemanticTrajectory;
 import onethreeseven.trajsuite.osm.model.tag.OsmTag;
-
 import java.io.File;
 import java.util.*;
 
@@ -86,12 +84,14 @@ class SemanticTrajToSequenceAdapter {
     class PlacesMapping{
 
         private int[][] placeIntSequences;
-        private BiMap<String, Integer> placeStrToId;
+        private Map<String, Integer> placeStrToId;
+        private Map<Integer, String> placeIdToStr;
         private Integer placeIdCounter = 0;
 
         PlacesMapping(int nSequences){
             this.placeIntSequences = new int[nSequences][];
-            this.placeStrToId = HashBiMap.create();
+            this.placeStrToId = new HashMap<>();
+            this.placeIdToStr = new HashMap<>();
         }
 
         void mapTo(int sequenceIdx, String[] placeStrings){
@@ -106,6 +106,7 @@ class SemanticTrajToSequenceAdapter {
                 if(placeId == null){
                     placeId = ++placeIdCounter;
                     placeStrToId.put(placeStr, placeId);
+                    placeIdToStr.put(placeId, placeStr);
                 }
                 //add the place id to the sequence
                 sequence[i] = placeId;
@@ -117,7 +118,7 @@ class SemanticTrajToSequenceAdapter {
         String[] unMap(int[] placeIntSequence){
             String[] placeStrSequence = new String[placeIntSequence.length];
             for (int i = 0; i < placeIntSequence.length; i++) {
-                placeStrSequence[i] = placeStrToId.inverse().get(placeIntSequence[i]);
+                placeStrSequence[i] = placeIdToStr.get(placeIntSequence[i]);
             }
             return placeStrSequence;
         }

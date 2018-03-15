@@ -43,6 +43,9 @@ dependencies {
     //our own modules
     ////////////////////
 
+    //geo
+    compile group: 'onethreeseven', name: 'geo', version: '0.0.4-SNAPSHOT'
+
     //common
     compile (group: 'onethreeseven', name: 'common', version: '0.0.5-SNAPSHOT') {force = true}
 
@@ -71,7 +74,6 @@ dependencies {
 
     //various useful 3rd party libs
     compile group: 'com.beust', name: 'jcommander', version: '1.48'
-    compile group: 'org.reflections', name: 'reflections', version: '0.9.11'
     compile group: 'gov.nasa', name: 'ww-core', version: '0.0.4'
 
     //for loading pbf files from OSM
@@ -93,7 +95,7 @@ dependencies {
     //for geometry
     compile group: 'com.vividsolutions', name: 'jts', version: '1.13'
     //for four-square api
-    compile group: 'me.atlis', name: 'foursquare-api', version: '1.0.6'
+    //compile group: 'me.atlis', name: 'foursquare-api', version: '1.0.6'
 }
  //String xercesPath = project.configurations.compile.find { it.name.startsWith("xercesImpl") }
 

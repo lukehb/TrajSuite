@@ -1,6 +1,5 @@
 package onethreeseven.trajsuite.experiments.Visualisation;
 
-import com.google.common.util.concurrent.*;
 import com.graphhopper.matching.EdgeMatch;
 import com.graphhopper.matching.MatchResult;
 import com.graphhopper.storage.index.QueryResult;
@@ -28,6 +27,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
@@ -46,8 +47,7 @@ public class VisualiseMapMatching extends AbstractWWFxApplication {
     private final File extract =
             new File(FileUtil.makeAppDir("gpx"), "beijing_china.osm.pbf");
 
-    private final ListeningExecutorService exec =
-            MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor());
+    private final ExecutorService exec = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) {
         launch(args);
@@ -99,18 +99,19 @@ public class VisualiseMapMatching extends AbstractWWFxApplication {
             }
         });
 
-        ListenableFuture<Tuple<List<EdgeMatch>, STTrajectory>> trajRes = mapMatch(dao, wwd);
-        Futures.addCallback(trajRes, new FutureCallback<>() {
-            @Override
-            public void onSuccess(Tuple<List<EdgeMatch>, STTrajectory> res) {
+        CompletableFuture<Tuple<List<EdgeMatch>, STTrajectory>> trajRes = mapMatch(dao, wwd);
 
+        trajRes.handle((listSTTrajectoryTuple, throwable) -> {
+
+            //success
+            if(throwable == null){
                 System.out.println("Loaded gpx as a trajectory.");
 
                 //setup stuff
                 Globe globe = wwd.getModel().getGlobe();
 
                 //add trajectory
-                SpatialTrajectory matchedTrail = dao.matchesToTrajectory(res.getValue1(), globe);
+                SpatialTrajectory matchedTrail = dao.matchesToTrajectory(listSTTrajectoryTuple.getValue1(), globe);
                 layers.getLayers().add(matchedTrail);
 
                 WrappedEntity ptsEntity = layers.getLayers().add(matchedTrail);
@@ -122,24 +123,23 @@ public class VisualiseMapMatching extends AbstractWWFxApplication {
                     //make points draw on top of trajectory lines (easier to see)
                     payload.drawOnTop.set(true);
                 }
-
-
+            }
+            //failure
+            else{
+                throwable.printStackTrace();
             }
 
-            @Override
-            public void onFailure(Throwable t) {
-                t.printStackTrace();
-            }
+            return null;
         });
     }
 
-    private ListenableFuture<Tuple<List<EdgeMatch>, STTrajectory>> mapMatch(final GraphHopperDAO dao, WorldWindow wwd) {
-        return exec.submit(() -> {
+    private CompletableFuture<Tuple<List<EdgeMatch>, STTrajectory>> mapMatch(final GraphHopperDAO dao, WorldWindow wwd) {
+        return CompletableFuture.supplyAsync(() -> {
             GPXFileWrapper trail = new GPXFileWrapper(gpxFile);
             MatchResult mr = dao.mapMatch(trail, true);
             STTrajectory traj = trail.toTrajectory();
             return new Tuple<>(mr.getEdgeMatches(), traj);
-        });
+        }, exec);
     }
 
 

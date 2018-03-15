@@ -1,12 +1,7 @@
-/**
- * Created by Luke on 14/09/2015.
- * Copyright 137Industries
- */
 
 package onethreeseven.trajsuite.osm.util;
 
 import onethreeseven.common.util.FileUtil;
-import com.google.common.io.Files;
 import org.openstreetmap.osmosis.core.Osmosis;
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +29,9 @@ public final class OSMUtil {
 
         Logger logger = Logger.getLogger(OSMUtil.class.getSimpleName());
 
-        boolean isPBF = Files.getFileExtension(bigOSMFile.getAbsolutePath()).equals("pbf");
-        boolean isBz2 = Files.getFileExtension(bigOSMFile.getAbsolutePath()).equals("bz2");
-        boolean isGzipped = Files.getFileExtension(bigOSMFile.getAbsolutePath()).equals("gz");
+        boolean isPBF = FileUtil.getExtension(bigOSMFile).equals("pbf");
+        boolean isBz2 = FileUtil.getExtension(bigOSMFile).equals("bz2");
+        boolean isGzipped = FileUtil.getExtension(bigOSMFile).equals("gz");
 
         if(!isPBF && !isBz2 && !isGzipped){
             throw new IllegalArgumentException("Output osm file must be .pbf .bz2 or .gz - instead it was:"

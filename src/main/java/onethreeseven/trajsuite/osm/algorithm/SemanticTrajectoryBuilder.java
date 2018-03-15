@@ -1,9 +1,9 @@
 package onethreeseven.trajsuite.osm.algorithm;
 
-import com.google.common.io.Files;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
+import onethreeseven.common.util.FileUtil;
 import onethreeseven.datastructures.model.CompositePt;
 import onethreeseven.datastructures.model.SpatioCompositeTrajectory;
 import onethreeseven.geo.model.LatLonBounds;
@@ -15,7 +15,6 @@ import onethreeseven.trajsuite.osm.model.StopEpisode;
 import onethreeseven.trajsuite.osm.model.tag.OsmTag;
 import onethreeseven.trajsuite.osm.model.tag.OsmTagFilter;
 import onethreeseven.trajsuite.osm.model.tag.Unknown;
-import onethreeseven.trajsuite.osm.util.FourSquarePlaceService;
 import org.openstreetmap.osmosis.core.domain.v0_6.Entity;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.task.v0_6.RunnableSource;
@@ -167,10 +166,12 @@ public class SemanticTrajectoryBuilder {
 
         RunnableSource reader = null;
 
-        if(Files.getFileExtension(osmFile.getAbsolutePath()).equals("pbf")){
+
+
+        if(FileUtil.getExtension(osmFile).equals("pbf")){
             reader = new PbfReader(osmFile, 4);
 
-        }else if(Files.getFileExtension(osmFile.getAbsolutePath()).equals("bz2")){
+        }else if(FileUtil.getExtension(osmFile).equals("bz2")){
             reader = new XmlReader(osmFile, false, CompressionMethod.BZip2);
         }
 
@@ -223,8 +224,8 @@ public class SemanticTrajectoryBuilder {
         populateStopRegionTrajsWithStopPlaces(osmFile, stopRegionTrajs, projection, studyRegion, matchingBufferMeters);
 
         if(useWebQueries){
-            log.info("Enriching empty stop regions using FourSquare.");
-            enrichWithFourSquare(stopRegionTrajs, projection, matchingBufferMeters);
+            //log.info("Enriching empty stop regions using FourSquare.");
+            //enrichWithFourSquare(stopRegionTrajs, projection, matchingBufferMeters);
         }
 
         //phase: choose just one place to be matched with each stop region
@@ -301,29 +302,29 @@ public class SemanticTrajectoryBuilder {
         return out;
     }
 
-    private void enrichWithFourSquare(Map<String, ArrayList<StopRegion>> trajs, AbstractGeographicProjection proj, int bufferMeters){
-        FourSquarePlaceService service = new FourSquarePlaceService();
-        //find any stop regions that have no candidate places and try to enrich with foursquare
-        for (ArrayList<StopRegion> stopRegions : trajs.values()) {
-            for (StopRegion stopRegion : stopRegions) {
-                if(stopRegion.getPlaces().isEmpty()){
-
-                    double[] latlonStop = proj.cartesianToGeographic(stopRegion.getStopEpisode().getCoords());
-                    int searchRadius = (int) (stopRegion.getStopEpisode().getStopRadiusMeters() + bufferMeters);
-                    Collection<CompositePt<SemanticPlace>> nearbyPlaces = service.getNearbyPlaces(latlonStop[0], latlonStop[1], searchRadius);
-
-                    for (CompositePt<SemanticPlace> nearbyPlace : nearbyPlaces) {
-                        double[] latlonPlace = nearbyPlace.getCoords();
-                        double[] placeCoords = proj.geographicToCartesian(latlonPlace[0], latlonPlace[1]);
-                        Geometry placeCenter = gf.createPoint(new Coordinate(placeCoords[0], placeCoords[1]));
-                        double pr = computeLogPlaceProbability(nearbyPlace.getExtra(), placeCenter, stopRegion.getStopEpisode(), bufferMeters);
-                        CandidatePlace geomPlace = new CandidatePlace(pr, nearbyPlace.getExtra(), placeCenter);
-                        stopRegion.getPlaces().add(geomPlace);
-                    }
-                }
-            }
-        }
-    }
+//    private void enrichWithFourSquare(Map<String, ArrayList<StopRegion>> trajs, AbstractGeographicProjection proj, int bufferMeters){
+//        FourSquarePlaceService service = new FourSquarePlaceService();
+//        //find any stop regions that have no candidate places and try to enrich with foursquare
+//        for (ArrayList<StopRegion> stopRegions : trajs.values()) {
+//            for (StopRegion stopRegion : stopRegions) {
+//                if(stopRegion.getPlaces().isEmpty()){
+//
+//                    double[] latlonStop = proj.cartesianToGeographic(stopRegion.getStopEpisode().getCoords());
+//                    int searchRadius = (int) (stopRegion.getStopEpisode().getStopRadiusMeters() + bufferMeters);
+//                    Collection<CompositePt<SemanticPlace>> nearbyPlaces = service.getNearbyPlaces(latlonStop[0], latlonStop[1], searchRadius);
+//
+//                    for (CompositePt<SemanticPlace> nearbyPlace : nearbyPlaces) {
+//                        double[] latlonPlace = nearbyPlace.getCoords();
+//                        double[] placeCoords = proj.geographicToCartesian(latlonPlace[0], latlonPlace[1]);
+//                        Geometry placeCenter = gf.createPoint(new Coordinate(placeCoords[0], placeCoords[1]));
+//                        double pr = computeLogPlaceProbability(nearbyPlace.getExtra(), placeCenter, stopRegion.getStopEpisode(), bufferMeters);
+//                        CandidatePlace geomPlace = new CandidatePlace(pr, nearbyPlace.getExtra(), placeCenter);
+//                        stopRegion.getPlaces().add(geomPlace);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private LatLonBounds makeStudyRegion(Map<String, SpatioCompositeTrajectory<StopEpisode>> trajs, int stopRegionBufferMeters){
         AbstractGeographicProjection projection = trajs.values().iterator().next().getProjection();

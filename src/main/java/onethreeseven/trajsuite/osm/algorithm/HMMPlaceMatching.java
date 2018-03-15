@@ -7,7 +7,6 @@ import onethreeseven.trajsuite.osm.model.*;
 import onethreeseven.trajsuite.osm.model.markov.HMMTrellis;
 import onethreeseven.trajsuite.osm.model.markov.MarkovState;
 import onethreeseven.trajsuite.osm.model.tag.OsmTag;
-import onethreeseven.trajsuite.osm.util.FourSquarePlaceService;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,60 +79,60 @@ public class HMMPlaceMatching implements IPlaceMatching {
 
         //enrich found places with foursquare
         if(queryWebForBetterPlaces){
-            log.info("Enriching ambiguous places with more information from FourSquare.");
-            enrichFoundPlaces(output);
+            //log.info("Enriching ambiguous places with more information from FourSquare.");
+            //enrichFoundPlaces(output);
         }
 
         return output;
     }
 
-    private void enrichFoundPlaces(Map<String, SemanticTrajectory> trajs){
-
-        //any tag that has low specificity gets a query to FourSquare for a better place data
-        final OsmTag.Specificity minAllowedSpecificity = OsmTag.Specificity.GENERIC;
-        final FourSquarePlaceService service = new FourSquarePlaceService();
-
-        //internal class used for querying foursquare and updating the places
-        class QueryFourSquare implements Runnable{
-            private SemanticPt pt;
-            private QueryFourSquare(SemanticPt pt){
-                this.pt = pt;
-            }
-
-            @Override
-            public void run(){
-                CompositePt<SemanticPlace> result = service.getClosestPlace(pt.getCoords()[0], pt.getCoords()[1], (int) maxSearchRadius);
-                SemanticPlace place = result.getExtra();
-                if(place != null && place.getSpecificity() >= minAllowedSpecificity.level){
-                    this.pt.getTimeAndPlace().setPlace(place);
-                }
-            }
-        }
-
-        final ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-
-        for (Map.Entry<String, SemanticTrajectory> entry : trajs.entrySet()) {
-
-            //make sure we are in geographic mode
-            entry.getValue().toGeographic();
-
-            for (SemanticPt semanticPt : entry.getValue()) {
-                SemanticPlace place = semanticPt.getTimeAndPlace().getPlace();
-                OsmTag.Specificity specifity = place.getPrimaryTag().getSpecificity();
-                if(specifity.level < minAllowedSpecificity.level){
-                    exec.submit(new QueryFourSquare(semanticPt));
-                }
-            }
-        }
-
-        //process the jobs
-        try {
-            exec.shutdown();
-            exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (SecurityException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void enrichFoundPlaces(Map<String, SemanticTrajectory> trajs){
+//
+//        //any tag that has low specificity gets a query to FourSquare for a better place data
+//        final OsmTag.Specificity minAllowedSpecificity = OsmTag.Specificity.GENERIC;
+//        final FourSquarePlaceService service = new FourSquarePlaceService();
+//
+//        //internal class used for querying foursquare and updating the places
+//        class QueryFourSquare implements Runnable{
+//            private SemanticPt pt;
+//            private QueryFourSquare(SemanticPt pt){
+//                this.pt = pt;
+//            }
+//
+//            @Override
+//            public void run(){
+//                CompositePt<SemanticPlace> result = service.getClosestPlace(pt.getCoords()[0], pt.getCoords()[1], (int) maxSearchRadius);
+//                SemanticPlace place = result.getExtra();
+//                if(place != null && place.getSpecificity() >= minAllowedSpecificity.level){
+//                    this.pt.getTimeAndPlace().setPlace(place);
+//                }
+//            }
+//        }
+//
+//        final ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+//
+//        for (Map.Entry<String, SemanticTrajectory> entry : trajs.entrySet()) {
+//
+//            //make sure we are in geographic mode
+//            entry.getValue().toGeographic();
+//
+//            for (SemanticPt semanticPt : entry.getValue()) {
+//                SemanticPlace place = semanticPt.getTimeAndPlace().getPlace();
+//                OsmTag.Specificity specifity = place.getPrimaryTag().getSpecificity();
+//                if(specifity.level < minAllowedSpecificity.level){
+//                    exec.submit(new QueryFourSquare(semanticPt));
+//                }
+//            }
+//        }
+//
+//        //process the jobs
+//        try {
+//            exec.shutdown();
+//            exec.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+//        } catch (SecurityException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private HMMTrellis populateHMM(ArrayList<SemanticTrajectoryBuilder.StopRegion> traj,
                                    RootState rootState, Table<String, Double> transitionMatrix){
