@@ -5,6 +5,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -58,6 +59,22 @@ public abstract class AbstractWWFxApplication extends BasicFxApplication {
 
     @Override
     protected Object initViewController(BaseTrajSuiteProgram program, Stage stage) {
+
+        URL iconUrl = AbstractWWFxApplication.class.getResource("icon.png");
+        if(iconUrl == null){
+            System.err.println("Could not get icon resource.");
+        }
+        else{
+            //set icon
+            try {
+                stage.getIcons().add(new Image(iconUrl.openStream()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
         TrajsuiteWWMainViewController controller = new TrajsuiteWWMainViewController((TrajSuiteProgram) program, stage);
         controller.addOnViewReadyListener((observable, oldValue, newValue) -> {
             if(newValue != null){

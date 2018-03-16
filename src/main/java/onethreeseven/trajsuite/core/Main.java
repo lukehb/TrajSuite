@@ -84,6 +84,7 @@ public class Main extends AbstractWWFxApplication {
         super.stop();
         program.shutdown();
         Platform.exit();
+        System.exit(0);
     }
 
     @Override

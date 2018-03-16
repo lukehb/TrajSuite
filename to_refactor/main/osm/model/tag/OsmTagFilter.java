@@ -14,7 +14,7 @@ public class OsmTagFilter {
     private static final Logger log = Logger.getLogger(OsmTagFilter.class.getSimpleName());
 
     private final HashSet<String> blacklistedTags;
-    private static final String packagePrefix = "trajsuite.osm.model.tag.";
+    private static final String packagePrefix = OsmTagFilter.class.getPackageName();
 
     public OsmTagFilter(){
         this.blacklistedTags = new HashSet<>();
@@ -37,7 +37,7 @@ public class OsmTagFilter {
         }
 
         String capitalised = tagKey.substring(0, 1).toUpperCase() + tagKey.substring(1);
-        String className = packagePrefix + capitalised;
+        String className = packagePrefix + "." + capitalised;
 
         try {
             Class<?> tagClass = Class.forName(className);

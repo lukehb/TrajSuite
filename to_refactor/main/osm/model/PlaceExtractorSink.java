@@ -120,8 +120,7 @@ public class PlaceExtractorSink implements Sink {
     }
 
     @Override
-    public void release() {
+    public void close() {
 
     }
-
 }

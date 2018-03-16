@@ -1,5 +1,6 @@
 package onethreeseven.trajsuite.core.util;
 
+import onethreeseven.trajsuitePlugin.util.IdGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.HashSet;

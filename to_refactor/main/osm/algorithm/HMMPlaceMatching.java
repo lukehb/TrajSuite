@@ -243,6 +243,7 @@ public class HMMPlaceMatching implements IPlaceMatching {
     /**
      * @param homogeneityFactor A value of 0 means completely random and divergent behaviours
      *                          and a value of 1 means completely group-like behaviours.
+     * @return A reference to this object, for method chaining.
      */
     public HMMPlaceMatching setHomogeneityFactor(double homogeneityFactor) {
         this.homogeneityFactor = homogeneityFactor;

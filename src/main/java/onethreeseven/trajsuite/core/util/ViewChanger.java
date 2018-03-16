@@ -115,12 +115,14 @@ public final class ViewChanger {
             layer.setEnabled(false);
         }
 
+        URL url = ViewChanger.class.getResource("/onethreeseven/trajsuite/core/view/worldwind_layers.xml");
 
+        if(url == null){
+            System.err.println("Could not load worldwind config resource file.");
+            return;
+        }
 
-
-        File configFile = new Res().getFile("worldwind_layers.xml");
-
-        Object obj = new BasicLayerFactory().createFromConfigSource(configFile, null);
+        Object obj = new BasicLayerFactory().createFromConfigSource(url, null);
 
         if (obj != null) {
             Object[] objects = (Object[]) obj;

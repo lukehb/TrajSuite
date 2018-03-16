@@ -23,7 +23,7 @@
     <Layer href="config/Earth/USGSTNMTopoLayer.xml" actuate="onRequest"/>
     <Layer href="config/Earth/USGSTopoLowResLayer.xml" actuate="onRequest"/>
 
-    <Layer className="gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer"/>
+    <Layer className="gov.nasa.worldwind.layers.Earth.NASAWFSPlaceNameLayer" actuate="onLoad"/>
     <Layer className="gov.nasa.worldwind.layers.WorldMapLayer"/>
     <Layer className="gov.nasa.worldwind.layers.ScalebarLayer"/>
     <Layer className="gov.nasa.worldwind.layers.CompassLayer"/>

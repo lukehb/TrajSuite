@@ -3,6 +3,8 @@
 *.iml
 
 ## Directory-based project format:
+executable/
+allJars/
 .idea/
 .gradle/
 build/

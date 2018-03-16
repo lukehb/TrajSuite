@@ -18,19 +18,22 @@ module onethreeseven.trajsuite.core {
     requires onethreeseven.stopmove;
     requires onethreeseven.common;
     requires onethreeseven.simplification;
-
-    requires graphhopper.core;
-    requires graphhopper.map.matching.core;
-    requires graphhopper.reader.osm;
     requires jogl.all.fat;
     requires gluegen.rt.fat;
-    requires hppc;
     requires jts;
-    requires osmosis.core;
-    requires osmosis.pbf2;
-    requires osmosis.xml;
     requires jcommander;
 
+    //when I refactor to add osm module back in
+    //requires graphhopper.core;
+    //requires graphhopper.map.matching.core;
+    //requires graphhopper.reader.osm;
+    //requires hppc;
+//    exports onethreeseven.trajsuite.osm.data;
+//    exports onethreeseven.trajsuite.osm.model.markov;
+//    exports onethreeseven.trajsuite.osm.util;
+    //    requires osmosis.core;
+//    requires osmosis.pbf2;
+//    requires osmosis.xml;
 
     //subject to module upgrade when I get around to it
     requires ww.core;
@@ -41,12 +44,9 @@ module onethreeseven.trajsuite.core {
 
     //exports
     exports onethreeseven.trajsuite.core;
-    exports onethreeseven.trajsuite.core.algorithm;
     exports onethreeseven.trajsuite.core.model;
     exports onethreeseven.trajsuite.core.util;
-    exports onethreeseven.trajsuite.osm.data;
-    exports onethreeseven.trajsuite.osm.model.markov;
-    exports onethreeseven.trajsuite.osm.util;
+
     exports onethreeseven.trajsuite.core.graphics;
 
     opens onethreeseven.trajsuite.core.view.controller to javafx.fxml;
