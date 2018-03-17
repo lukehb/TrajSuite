@@ -13,7 +13,7 @@ Currently TrajSuite is built with the following functional modules:
 ## Getting it
 Windows/Mac/Linux 64bit builds [here](https://drive.google.com/open?id=1kXCBqB5VCw4U1rJ09glHsA3blA1Rb1pT).
 
-## Data-set
+## Data-sets
 TrajSuite supports any plain-text trajectory dataset as a single file. [Here](https://drive.google.com/drive/folders/1sc8aMxWh5cvkVvuY1SY-f-ErV57dOFQa?usp=sharing) are a few to get you started.
 
 ## How to use it
